@@ -1,0 +1,39 @@
+# ROS2 build output
+build/
+install/
+log/
+.colcon_workspace
+
+# ROS 2 caches
+**/.ros/
+**/.cache/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# CMake / colcon
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+*.cmake
+
+# IDE
+.vscode/
+.idea/
+
+# Bags / large data
+*.db3
+*.bag
+*.bag.active
+
+# RVIZ
+*.rviz
+*.rviz2
+
+# OS
+.DS_Store
+Thumbs.db

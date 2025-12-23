@@ -5,7 +5,6 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    # World dosyası argümanı
     world_arg = DeclareLaunchArgument(
         'world',
         default_value=PathJoinSubstitution([
@@ -17,7 +16,6 @@ def generate_launch_description():
         description='Path to SDF world file'
     )
 
-    # Gazebo'yu çalıştır
     ign = ExecuteProcess(
         cmd=['ign', 'gazebo', '-r', LaunchConfiguration('world')],
         output='screen',
@@ -30,26 +28,38 @@ def generate_launch_description():
         }
     )
 
-    # ------------------------ STATIC TF ------------------------
-
-    static_tf_lidar = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_tf_lidar',
+    bridge = Node(
+        package='ros_gz_bridge',
+        executable='parameter_bridge',
+        name='ros_gz_parameter_bridge',
         output='screen',
-        arguments=['0', '0', '0', '0', '0', '0', 'world', 'lidar_link']
+        arguments=[
+            # CLOCK
+            '/world/cave/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
+
+            # IMU
+            '/world/cave/model/M100/link/base_link/sensor/imu_sensor/imu'
+            '@sensor_msgs/msg/Imu[gz.msgs.IMU',
+
+            # Camera
+            '/x3/camera/image_raw@sensor_msgs/msg/Image[gz.msgs.Image',
+
+            # LiDAR
+            '/x3/lidar/points@sensor_msgs/msg/PointCloud2[gz.msgs.PointCloudPacked',
+
+            # cmd_vel
+            '/model/M100/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist',
+
+            # Pose
+            '/world/cave/dynamic_pose/info@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V',
+        ],
+        remappings=[
+            ('/world/cave/clock', '/clock'),
+            ('/world/cave/model/M100/link/base_link/sensor/imu_sensor/imu', '/m100/imu'),
+        ],
     )
 
-    static_tf_imu = Node(
-        package='tf2_ros',
-        executable='static_transform_publisher',
-        name='static_tf_imu',
-        output='screen',
-        arguments=['0', '0', '0', '0', '0', '0', 'base_link', 'M100/base_link/imu_sensor']
-    )
-
-    # ------------------------ CUSTOM FIX NODES ------------------------
-
+    # --- IMU frame fix ---
     imu_frame_fix = Node(
         package='sim_bringup',
         executable='imu_frame_fix',
@@ -58,46 +68,37 @@ def generate_launch_description():
         parameters=[{'use_sim_time': True}]
     )
 
-    tf_parent_fix = Node(
+    # --- ODOM from Gazebo pose ---
+    odom_from_gz_pose = Node(
         package='sim_bringup',
-        executable='tf_parent_fix',
-        name='tf_parent_fix',
+        executable='odom_from_gz_pose',
+        name='odom_from_gz_pose',
         output='screen',
-        parameters=[{'use_sim_time': True}],
+        parameters=[{
+            'use_sim_time': True,
+            'pose_topic': '/world/cave/dynamic_pose/info',
+            'model_name': 'M100',
+            'odom_frame': 'odom',
+            'child_frame': 'base_link',
+            'publish_odom': True,
+            'publish_tf': True,
+        }]
     )
 
-    # ------------------------ GZ-ROS BRIDGE ------------------------
-
-    bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='ros_gz_parameter_bridge',
-        output='screen',
+    # --- 🔥 STATIC TF: base_link -> lidar_link ---
+    static_lidar_tf = Node(
+        package='tf2_ros',
+        executable='static_transform_publisher',
+        name='base_to_lidar_tf',
         arguments=[
-            '/clock@rosgraph_msgs/msg/Clock@gz.msgs.Clock',
-
-            '/world/cave/dynamic_pose/info@tf2_msgs/msg/TFMessage@gz.msgs.Pose_V',
-
-            '/world/cave/model/M100/link/base_link/sensor/imu_sensor/imu'
-            '@sensor_msgs/msg/Imu@gz.msgs.IMU',
-
-            # Kamera — BURASI ÖNEMLİ
-            '/x3/camera/image_raw@sensor_msgs/msg/Image@gz.msgs.Image',
-
-            # LIDAR
-            '/x3/lidar/points@sensor_msgs/msg/PointCloud2@gz.msgs.PointCloudPacked',
-            '/model/M100/cmd_vel@geometry_msgs/msg/Twist@gz.msgs.Twist',
+            '0.10', '0.0', '0.135',   # x y z
+            '0', '0', '0',           # roll pitch yaw
+            'base_link',
+            'lidar_link'
         ],
-        remappings=[
-            ('/world/cave/dynamic_pose/info', '/tf_raw'),
-            ('/world/cave/model/M100/link/base_link/sensor/imu_sensor/imu', '/m100/imu'),
-        ],
-        parameters=[
-            {'qos_overrides./tf_static.publisher.durability': 'transient_local'}
-        ]
+        parameters=[{'use_sim_time': True}],
+        output='screen'
     )
-
-    # ------------------------ FOXGLOVE ------------------------
 
     foxglove = Node(
         package='foxglove_bridge',
@@ -107,16 +108,13 @@ def generate_launch_description():
         parameters=[{'port': 8765}]
     )
 
-    # ------------------------ RETURN ------------------------
-
     return LaunchDescription([
         world_arg,
         ign,
         bridge,
+        imu_frame_fix,
+        odom_from_gz_pose,
+        static_lidar_tf,   # 👈 BURASI
         foxglove,
-        tf_parent_fix,
-        static_tf_imu,
-        static_tf_lidar,
-        imu_frame_fix
     ])
 

@@ -29,6 +29,7 @@ setup(
         'console_scripts': [
         	'tf_parent_fix = sim_bringup.tf_parent_fix:main',
         	'imu_frame_fix = sim_bringup.imu_frame_fix:main',
+        	'odom_from_gz_pose = sim_bringup.odom_from_gz_pose:main',
             
         ],
     },
