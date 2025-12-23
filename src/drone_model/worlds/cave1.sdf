@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sdf version="1.6">
+  <world name="cave">
+
+    <physics name="dartsim" type="dartsim">
+      <!-- Simülasyon çözünürlüğü -->
+      <max_step_size>0.001</max_step_size>            <!-- 1 ms step -->
+      <real_time_update_rate>1000</real_time_update_rate>
+
+      <!-- Çözücü ayarları -->
+      <solver>
+        <iters>200</iters>
+        <sor>1.0</sor>
+      </solver>
+
+      <!-- ODE çakışma çözücüsünü kararlı tutmak için -->
+      <constraints>
+        <cfm>0.0</cfm>
+        <erp>0.2</erp>
+      </constraints>
+    </physics>
+
+    <!-- Sensörleri çalıştıran sistem (GPU LiDAR için ogre2 gerekli) -->
+    <plugin filename="libignition-gazebo-sensors-system.so"
+            name="ignition::gazebo::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+
+    <plugin
+      filename="ignition-gazebo-physics-system"
+      name="ignition::gazebo::systems::Physics">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-scene-broadcaster-system"
+      name="ignition::gazebo::systems::SceneBroadcaster">
+    </plugin>
+    <plugin
+      filename="ignition-gazebo-user-commands-system"
+      name="ignition::gazebo::systems::UserCommands">
+    </plugin>
+
+    <!-- SAHNE AYDINLATMA -->
+    <scene>
+      <ambient>0.4 0.4 0.4 1.0</ambient>
+      <background>0.2 0.2 0.2 1.0</background>
+      <grid>false</grid>
+      <origin_visual>false</origin_visual>
+    </scene>
+
+    <!-- Ek directional light (güneş benzeri) -->
+    <light type="directional" name="sun_light">
+      <cast_shadows>true</cast_shadows>
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>1 1 1 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.3 0 -1</direction>
+    </light>
+
+    <!--The staging area-->
+    <include>
+      <static>true</static>
+      <name>staging_area</name>
+      <pose>0 0 0 0 0 -4.712389</pose>
+      <uri>model://CaveStartingAreaB_DS</uri>
+    </include>
+
+    <!--Tunnel tiles and artifacts-->
+    <include>
+      <name>tile_1</name>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Urban%20Cave%20Transition</uri>
+      <pose>0 37.5 0 0 0 1.570796</pose>
+    </include>
+
+    <include>
+      <name>tile_2</name>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Urban%202%20Story%20Large%20Side%202</uri>
+      <pose>-32 37.5 0.000004 0 0 1.570796</pose>
+    </include>
+
+    <include>
+      <name>tile_3</name>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/urban%20cave%20transition%20straight</uri>
+      <pose>16.8 37.4 -0.000002 0 0 1.570796</pose>
+    </include>
+
+    <include>
+      <name>tile_4</name>
+      <uri>https://fuel.ignitionrobotics.org/1.0/OpenRobotics/models/Urban%20Station</uri>
+      <pose>48.50001 46 0.799993 0 0 1.570796</pose>
+    </include>
+
+    <include>
+      <name>M100</name>
+      <uri>model://X3</uri>
+      <pose>0 0 2 0 0 0</pose>
+    </include>
+
+    
+    <model name='box'>
+      <pose>-0.179761 -4.36778 0.505 0 -0 0</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 -0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>10 0.15 0.01</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>10 0.15 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 -0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>true</static>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='box_1'>
+      <pose>-5.41037 -9.2302 0.505 0 -0 1.54974</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>10 0.15 0.01</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>10 0.15 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>true</static>
+      <self_collide>false</self_collide>
+    </model>
+    <model name='box_2'>
+      <pose>-10.3413 -14.2438 0.505 0 -0 0</pose>
+      <link name='box_link'>
+        <inertial>
+          <inertia>
+            <ixx>0.16666</ixx>
+            <ixy>0</ixy>
+            <ixz>0</ixz>
+            <iyy>0.16666</iyy>
+            <iyz>0</iyz>
+            <izz>0.16666</izz>
+          </inertia>
+          <mass>1</mass>
+          <pose>0 0 0 0 0 0</pose>
+        </inertial>
+        <collision name='box_collision'>
+          <geometry>
+            <box>
+              <size>10 0.15 0.01</size>
+            </box>
+          </geometry>
+          <surface>
+            <friction>
+              <ode/>
+            </friction>
+            <bounce/>
+            <contact/>
+          </surface>
+        </collision>
+        <visual name='box_visual'>
+          <geometry>
+            <box>
+              <size>10 0.15 0.01</size>
+            </box>
+          </geometry>
+          <material>
+            <ambient>1 0 0 1</ambient>
+            <diffuse>1 0 0 1</diffuse>
+            <specular>1 1 1 1</specular>
+          </material>
+        </visual>
+        <pose>0 0 0 0 0 0</pose>
+        <enable_wind>false</enable_wind>
+      </link>
+      <static>true</static>
+      <self_collide>false</self_collide>
+    </model>
+ 
+    
+
+  </world>
+  
+ 
+</sdf>
+
